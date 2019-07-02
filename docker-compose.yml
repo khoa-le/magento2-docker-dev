@@ -1,0 +1,50 @@
+version: "2"
+services:
+  web:
+    build:
+      context: nginx/
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - php
+      - db
+    volumes_from:
+      - appdata
+    env_file:
+      - ./global.env
+    
+  php:
+    hostname: dev.magento2
+    build:
+      context: php/
+    ports:
+      - 9000
+    volumes_from:
+      - appdata
+    links:
+      - db
+      - redis
+    env_file:
+      - ./global.env
+  db:
+    image: mariadb:10
+    ports:
+      - "3306:3306"
+    volumes_from:
+      - dbdata
+    environment:
+      - MYSQL_ROOT_PASSWORD=magento2
+      - MYSQL_DATABASE=magento2
+      - MYSQL_USER=magento2
+      - MYSQL_PASSWORD=magento2
+  redis:
+    image: redis:latest
+  appdata:
+    image: tianon/true
+    volumes:
+      - ./magento2:/var/www/magento2
+  dbdata:
+    image: tianon/true
+    volumes:
+      - /var/lib/mysql
